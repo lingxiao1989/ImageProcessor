@@ -19,23 +19,29 @@ class mapping_table:
       return self.last
 
 def curve_ext(input_img):
+
   ##make new empty image.
   pi=3.1415
   img=cv2.imread(input_img,0)
   h,w = img.shape
   h_out = int(h*pi)
   w_out = w
+  print("input hight:", h)
+  print("input weight:", w)
+  print("output hight:", h_out)
+  print("output weight:", w_out)
   result = numpy.zeros((h_out,w_out),numpy.uint8)
-  print(h)
-  table = mapping_table(200)
-  ##for iteration to calcaulate mapping point in the original image. Round the float value.
-  #for i in range (w_out):
-    #for j in range(h_out):
-      #result[j,i] = img[table.map_point(j),i]
+  table = mapping_table(int(h/2))
 
-  for i in range (300):
-    #print (i)
-    print (table.map_point(i))
+  ##for iteration to calcaulate mapping point in the original image. Round the float value.
+  offset=int(h_out/2)
+  for i in range (w_out):
+    for j in range(offset):
+      result[offset+j, i] = img[int(h/2)+table.map_point(j), i]
+      result[offset-j, i] = img[int(h/2)-table.map_point(j), i]
+  
+    #print (table.map_point(i))
+
   ##return the new image.
   return result
 
@@ -45,5 +51,8 @@ def main():
   img_file = 'egg.png'
   result = curve_ext(img_file)
   cv2.imshow('result', result)
+  cv2.imwrite('result.png', result)
+  cv2.waitKey(0)
+
 if __name__ == "__main__":
   main()
