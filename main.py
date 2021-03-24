@@ -11,12 +11,18 @@ class circle_mapping_table:
       val,err = integrate.quad(lambda x,r:r * math.sqrt(1/(r**2-x**2)),0,i,args=(self.r,))
       self.table[int(val)] = i
     self.last = 0
+    for j in range (int(r*3.14/2)):
+      self.map_point(j)
+
   def map_point(self,input):
     if input in self.table:
       self.last = self.table[input]
       return self.table[input]
     else:
       return self.last
+
+  def get_table(self):
+    return self.table
 
 class egg_curve_mapping_table:
   def __init__(self,r,a,b):
@@ -65,6 +71,12 @@ def curve_ext(input_img):
   print("output hight:", h_out)
   print("output weight:", w_out)
   result = numpy.zeros((h_out,w_out),numpy.uint8)
+  x_draft = {}
+  y_draft = {}
+  for i in range(int(h/2)):
+    table=circle_mapping_table(i)
+    x_draft[i]=table.get_table()
+    
   table_c = circle_mapping_table(int(h/2))
   table_e = egg_curve_mapping_table(int(h/2), int(w/0.4), int(w/0.6))
 
