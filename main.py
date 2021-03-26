@@ -59,13 +59,20 @@ class egg_curve_mapping_table:
     else:
       return self.last_b
 
+def oval_func(x, r, s, l):
+  return r**2 * math.sqrt(1-(s+l)**2 * x**2/((l-s)*x+2*s*l)**2)
+  
 def curve_ext(input_img):
   ##make new empty image.
   pi=3.1415
+  ratio = 0.4
   img=cv2.imread(input_img,0)
   h,w = img.shape
+  r = int(h/2)
+  s = int(w * ratio)
+  l = int(w * (1-ratio))
   h_out = int(h*pi/2)
-  w_out = w
+  w_out = int(w*pi/2)
   print("input hight:", h)
   print("input weight:", w)
   print("output hight:", h_out)
@@ -75,7 +82,7 @@ def curve_ext(input_img):
   y_draft = {}
   for i in range(int(h/2)):
     table=circle_mapping_table(i)
-    x_draft[i]=table.get_table()
+    y_draft[i]=table.get_table()
     
   table_c = circle_mapping_table(int(h/2))
   table_e = egg_curve_mapping_table(int(h/2), int(w/0.4), int(w/0.6))
