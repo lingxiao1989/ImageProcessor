@@ -73,6 +73,8 @@ def curve_ext(input_img):
   l = int(w * (1-ratio))
   h_out = int(h*pi/2)
   w_out = int(w*pi/2)
+  table_c = circle_mapping_table(r)
+  table_e = egg_curve_mapping_table(r, s, l)
   print("input hight:", h)
   print("input weight:", w)
   print("output hight:", h_out)
@@ -80,6 +82,11 @@ def curve_ext(input_img):
   result = numpy.zeros((h_out,w_out),numpy.uint8)
   x_draft = {}
   y_draft = {}
+    for i in range(w):
+      y = oval_func(i-s, r, s, l)
+      y_draft[i] = table_c.get_table(y)
+    for j in range(h):
+
   for i in range(int(h/2)):
     table=circle_mapping_table(i)
     y_draft[i]=table.get_table()
