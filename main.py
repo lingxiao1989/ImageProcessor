@@ -59,9 +59,23 @@ class egg_curve_mapping_table:
     else:
       return self.last_b
 
-def oval_func(x, r, s, l):
-  return r**2 * math.sqrt(1-(s+l)**2 * x**2/((l-s)*x+2*s*l)**2)
-  
+class oval_func:
+  def __init__(self,r,s,l):
+    self.short_curve={}
+    self.long_curve={}
+    for i in range(s):
+      temp = i-s
+      self.short_curve[i] = r**2 * math.sqrt(1-(s+l)**2 * temp**2/((l-s)*temp+2*s*l)**2)
+    for j in range(l):
+      self.long_curve[j] = r**2 * math.sqrt(1-(s+l)**2 * j**2/((l-s)*j+2*s*l)**2)
+  def get_y(self, x):
+    if x < s:
+      return self.short_curve[x]
+    else:
+      return self.long_curve[x]
+  def get_x(self, y):
+    return self.long_curve[x]
+
 def curve_ext(input_img):
   ##make new empty image.
   pi=3.1415
