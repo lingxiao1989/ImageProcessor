@@ -133,11 +133,6 @@ def curve_ext(input_img):
   ##for iteration to calcaulate mapping point in the original image. Round the float value.
   offset=int(h_out/2)
 
-  # for a, b in y_draft[203]:
-  #   print(a)
-  #   print(b)
-  #   result[offset+b, i] = img[int(h/2)+a, i]
-  #   result[offset-b, i] = img[int(h/2)-a, i]
   for i in range (w):
     y_maps =  y_draft[i]
     for key in y_maps:
