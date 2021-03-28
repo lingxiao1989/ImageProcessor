@@ -40,6 +40,8 @@ class egg_curve_mapping_table:
     self.correlations = oval_func(r, s, l)
     for i in range (self.r):
       i_s, i_l = self.correlations.get_x(i)
+      print(i_s)
+      print(i_l)
       self.full_table_s[i_s], self.full_table_l[i_l]= self._get_table(int(math.sqrt(self.r**2-i**2)),i_s,i_l)
 
   def _get_table(self, r, s, l):
@@ -47,15 +49,15 @@ class egg_curve_mapping_table:
     current_table_l = {}
     for i in range (s):
       val,err = integrate.quad(
-        lambda x, r, s, l: r * math.sqrt((1 - (s + l)**2 * x**2/(2*s*l + x*(l - s))**2 )) * (-0.5*(s + l)**2 * x**2 * (-2*l + 2*s)/(2*s*l + x*(l - s))**3 - (s + l)**2*x/(2*s*l + x*(l - s))**2),
+        lambda x, r, s, l: math.sqrt(1 + (r * math.sqrt(1 - (s + l)**2 * x**2/(2*s*l + x*(l - s))**2 ) * (-0.5*(s + l)**2 * x**2 * (-2*l + 2*s)/(2*s*l + x*(l - s))**3 - (s + l)**2*x/(2*s*l + x*(l - s))**2))**2),
         i-s,0,
-        args=(r, s, l))
+        args=(r, s, l,))
       current_table_r[i] = int(val)
-    for j in range (l):
+    for j in range (l+1):
       val,err = integrate.quad(
-        lambda x, r, s, l: r * math.sqrt((1 - (s + l)**2 * x**2/(2*s*l + x*(l - s))**2 )) * (-0.5*(s + l)**2 * x**2 * (-2*l + 2*s)/(2*s*l + x*(l - s))**3 - (s + l)**2*x/(2*s*l + x*(l - s))**2),
+        lambda x, r, s, l: math.sqrt(1 + (r * math.sqrt(1 - (s + l)**2 * x**2/(2*s*l + x*(l - s))**2 ) * (-0.5*(s + l)**2 * x**2 * (-2*l + 2*s)/(2*s*l + x*(l - s))**3 - (s + l)**2*x/(2*s*l + x*(l - s))**2))**2),
         0,j,
-        args=(r, s, l))
+        args=(r, s, l,))
       current_table_l[j] = int(val)
     return current_table_r, current_table_l
 
@@ -83,16 +85,21 @@ class oval_func:
     self.long_curve_x={}
     self.short_curve_y={}
     self.long_curve_y={}
-    #self.short_curve_y[0]= s
-    #self.long_curve_y[0]= l
     self.s = s
+    temp={}
     for i in range(s+1):
       temp = i-s
       self.short_curve_x[i] = int(r * math.sqrt(1-(s+l)**2 * temp**2/((l-s)*temp+2*s*l)**2))
-      self.short_curve_y[self.short_curve_x[i]]= i
+      temp[self.short_curve_x[i]]= s-i
+    for key in temp:
+      if
+    self.short_curve_y
     for j in range(l+1):
       self.long_curve_x[j] = int(r * math.sqrt(1-(s+l)**2 * j**2/((l-s)*j+2*s*l)**2))
-      self.long_curve_y[self.long_curve_x[j]] = j
+      self.temp[self.long_curve_x[j]] = j
+    self.long_curve_y
+    print(self.short_curve_y)
+    print(self.long_curve_y)
   def get_y(self, x):
     if x < self.s:
       return self.short_curve_x[x]
@@ -104,9 +111,9 @@ class oval_func:
 def curve_ext(input_img):
   ##make new empty image.
   pi=3.1415
-  ratio = 0.4
-  img=cv2.imread(input_img,0)
-  h,w = img.shape
+  ratio = 0.46
+  img=cv2.imread(input_img)
+  h,w,c = img.shape
   r = int(h/2)
   s = int(w * ratio)
   l = int(w * (1-ratio))
@@ -114,12 +121,13 @@ def curve_ext(input_img):
   w_out = int(w*pi/2)
   correlations = oval_func(r, s, l)
   table_c = circle_mapping_table(r)
-  #table_e = egg_curve_mapping_table(r, s, l)
+  table_e = egg_curve_mapping_table(r, s, l)
   print("input hight:", h)
   print("input weight:", w)
   print("output hight:", h_out)
   print("output weight:", w_out)
-  result = numpy.zeros((h_out,w_out),numpy.uint8)
+  result = numpy.zeros((h_out,w_out,c),numpy.uint8)
+  
   x_draft_s = {}
   x_draft_l = {}
   y_draft = {}
@@ -127,17 +135,30 @@ def curve_ext(input_img):
   for i in range(w):
     y = correlations.get_y(i)
     y_draft[i] = table_c.check_table(y)
-  #for j in range(r):
-    #x_draft_s[j], x_draft_l[j] = table_e.check_table(j)
+  for j in range(r):
+    x_draft_s[j], x_draft_l[j] = table_e.check_table(j)
 
   ##for iteration to calcaulate mapping point in the original image. Round the float value.
   offset=int(h_out/2)
+  # for i in range (w):
+  #   y_maps =  y_draft[i]
+  #   for key in y_maps:
+  #     result1[offset+key, i] = img[int(h/2)+key, i]
+  #     result1[offset-key, i] = img[int(h/2)-key, i]
+  for k in range(c):
+    for i in range (w):
+      y_maps =  y_draft[i]
+      for key in y_maps:
+        result[offset+y_maps[key], i, k] = img[int(h/2)+key, i, k]
+        result[offset-y_maps[key], i, k] = img[int(h/2)-key, i, k]
 
-  for i in range (w):
-    y_maps =  y_draft[i]
-    for key in y_maps:
-      result[offset+y_maps[key], i] = img[int(h/2)+key, i]
-      result[offset-y_maps[key], i] = img[int(h/2)-key, i]
+    for i in range (w):
+      for j in range (2, offset):
+        if result[j,i,k] == 0:
+          result[j,i,k] = result[j-1,i,k]
+        if result[2*offset - j,i,k] == 0:
+          result[2*offset - j,i,k] = result[2*offset - j+1,i,k]
+
     #print (table.map_point(i))
 
   ##return the new image.
@@ -146,10 +167,25 @@ def curve_ext(input_img):
 def main():
   #val,err = integrate.quad(circle_func, -2,2, args=(2,))
   #print(val)
-  img_file = 'egg.png'
-  result = curve_ext(img_file)
-  cv2.imshow('result', result)
-  cv2.imwrite('result.png', result)
+  img_file = 'angle1.jpg'
+  result1 = curve_ext(img_file)
+  cv2.imshow('result1', result1)
+  cv2.imwrite('result1.jpg', result1)
+  cv2.waitKey(0)
+  img_file = 'angle2.jpg'
+  result2 = curve_ext(img_file)
+  cv2.imshow('result2', result2)
+  cv2.imwrite('result2.jpg', result2)
+  cv2.waitKey(0)
+  img_file = 'angle3.jpg'
+  result3 = curve_ext(img_file)
+  cv2.imshow('result3', result3)
+  cv2.imwrite('result3.jpg', result3)
+  cv2.waitKey(0)
+  img_file = 'angle4.jpg'
+  result4 = curve_ext(img_file)
+  cv2.imshow('result4', result4)
+  cv2.imwrite('result4.jpg', result4)
   cv2.waitKey(0)
 
 if __name__ == "__main__":
