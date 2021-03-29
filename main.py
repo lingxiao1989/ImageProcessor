@@ -12,6 +12,7 @@ class circle_mapping_table:
 
   def _get_table(self, r):
     current_table={}
+    current_table[0]=0
     for i in range (r):
       val,err = integrate.quad(lambda x,r:r * math.sqrt(1/(r**2-x**2)),0,i,args=(r,))
       current_table[i] = int(val)
@@ -103,6 +104,9 @@ def curve_ext(input_img, ratio = 0.46):
   l = int(w * (1-ratio))
   h_out = int(h*pi/2)
   w_out = int(w*pi/2)
+  print("r:",r)
+  print("s:",s)
+  print("l:",l)
   print("input hight:", h)
   print("input weight:", w)
   print("output hight:", h_out)
@@ -121,20 +125,27 @@ def curve_ext(input_img, ratio = 0.46):
     y_draft[i] = table_c.check_table(y)
   for j in range(r):
     x_draft_s[j], x_draft_l[j] = table_e.check_table(j)
-
+  # print("100long:",x_draft_s[100])
+  # print("100short:",x_draft_s[100])
+  # print("150long:",x_draft_s[150])
+  # print("150short:",x_draft_s[150])
   ## generating the output image.
   # for i in range (w):
   #   y_maps =  y_draft[i]
   #   for key in y_maps:
   #     result1[offset+key, i] = img[int(h/2)+key, i]
   #     result1[offset-key, i] = img[int(h/2)-key, i]
-  offset=int(h_out/2)
+  offset_y=int(h_out/2)
+  offset_x=int(w_out*ratio)  
   for k in range(c):
     for i in range (w):
-      y_maps =  y_draft[i]
-      for key in y_maps:
-        result[offset+y_maps[key], i, k] = img[int(h/2)+key, i, k]
-        result[offset-y_maps[key], i, k] = img[int(h/2)-key, i, k]
+      for j in range(r):
+        x_maps_l = x_draft_l[j]
+        x_maps_s = x_draft_s[j]
+        y_maps =  y_draft[i]
+        if j in y_maps and (s-i in x_maps_s or i-s in x_maps_l):
+          result[offset_y+y_maps[j], i, k] = img[int(h/2)+j, i, k]
+          result[offset_y-y_maps[j], i, k] = img[int(h/2)-j, i, k]
 
     for i in range (w):
       for j in range (2, offset):
@@ -149,9 +160,9 @@ def main():
   #val,err = integrate.quad(circle_func, -2,2, args=(2,))
   #print(val)
   img_file = 'angle1.jpg'
-  result1 = curve_ext(img_file, 0.46)
-  # cv2.imshow('result1', result1)
-  # cv2.imwrite('result1.jpg', result1)
+  result1 = curve_ext(img_file, 0.48)
+  cv2.imshow('result1', result1)
+  cv2.imwrite('result1.jpg', result1)
   # cv2.waitKey(0)
   # img_file = 'angle2.jpg'
   # result2 = curve_ext(img_file)
