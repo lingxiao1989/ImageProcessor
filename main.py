@@ -119,10 +119,9 @@ class oval_func:
   def get_x(self, y):
     return self.short_curve_y[y], self.long_curve_y[y]
 
-def curve_ext(input_img):
+def curve_ext(input_img, ratio = 0.46):
   ##make new empty image.
   pi=3.14159
-  ratio = 0.46
   img=cv2.imread(input_img)
   h,w,c = img.shape
   r = int(h/2)
@@ -179,7 +178,7 @@ def main():
   #val,err = integrate.quad(circle_func, -2,2, args=(2,))
   #print(val)
   img_file = 'angle1.jpg'
-  result1 = curve_ext(img_file)
+  result1 = curve_ext(img_file, 0.46)
   # cv2.imshow('result1', result1)
   # cv2.imwrite('result1.jpg', result1)
   # cv2.waitKey(0)
