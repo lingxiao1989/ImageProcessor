@@ -10,16 +10,6 @@ class circle_mapping_table:
     for i in range(self.r+1):
       self.full_table[i]=self._get_table(i)
 
-  # def map_point(self,input):
-  #   self.last = 0
-  #   for j in range (int(r*3.14/2)):
-  #     self.map_point(j)
-  #   if input in self.table:
-  #     self.last = self.table[input]
-  #     return self.table[input]
-  #   else:
-  #     return self.last
-
   def _get_table(self, r):
     current_table={}
     for i in range (r):
@@ -63,20 +53,6 @@ class egg_curve_mapping_table:
     s, l = self.correlations.get_x(r)
     return self.full_table_s[s], self.full_table_l[l]
 
-  # def map_point_a(self,input):
-  #   if input in self.table_a:
-  #     self.last_a = self.table_a[input]
-  #     return self.table_a[input]
-  #   else:
-  #     return self.last_a
-
-  # def map_point_b(self,input):
-  #   if input in self.table_b:
-  #     self.last_b = self.table_b[input]
-  #     return self.table_b[input]
-  #   else:
-  #     return self.last_b
-
 class oval_func:
   def __init__(self,r,s,l):
     self.short_curve_x={}
@@ -86,7 +62,6 @@ class oval_func:
     self.s = s
     temp_table={}
     last_y=0
-
     for i in range(s+1):
       temp = i-s
       self.short_curve_x[i] = int(r * math.sqrt(1-(s+l)**2 * temp**2/((l-s)*temp+2*s*l)**2))
@@ -97,10 +72,8 @@ class oval_func:
         last_y = temp_table[k]
       else:
         self.short_curve_y[k] = last_y
-
     temp_table={}
     last_y=0
-
     for j in range(l+1):
       self.long_curve_x[j] = int(r * math.sqrt(1-(s+l)**2 * j**2/((l-s)*j+2*s*l)**2))
       temp_table[self.long_curve_x[j]] = j
@@ -116,11 +89,12 @@ class oval_func:
       return self.short_curve_x[x]
     else:
       return self.long_curve_x[x-self.s]
+
   def get_x(self, y):
     return self.short_curve_y[y], self.long_curve_y[y]
 
 def curve_ext(input_img, ratio = 0.46):
-  ##make new empty image.
+  ## make new empty image.
   pi=3.14159
   img=cv2.imread(input_img)
   h,w,c = img.shape
@@ -129,32 +103,32 @@ def curve_ext(input_img, ratio = 0.46):
   l = int(w * (1-ratio))
   h_out = int(h*pi/2)
   w_out = int(w*pi/2)
-  correlations = oval_func(r, s, l)
-  table_c = circle_mapping_table(r)
-  table_e = egg_curve_mapping_table(r, s, l)
   print("input hight:", h)
   print("input weight:", w)
   print("output hight:", h_out)
   print("output weight:", w_out)
+
+  ## for iteration to calcaulate mapping point in the original image. Round the float value.
+  correlations = oval_func(r, s, l)
+  table_c = circle_mapping_table(r)
+  table_e = egg_curve_mapping_table(r, s, l)
   result = numpy.zeros((h_out,w_out,c),numpy.uint8)
-  
   x_draft_s = {}
   x_draft_l = {}
   y_draft = {}
-
   for i in range(w):
     y = correlations.get_y(i)
     y_draft[i] = table_c.check_table(y)
   for j in range(r):
     x_draft_s[j], x_draft_l[j] = table_e.check_table(j)
 
-  ##for iteration to calcaulate mapping point in the original image. Round the float value.
-  offset=int(h_out/2)
+  ## generating the output image.
   # for i in range (w):
   #   y_maps =  y_draft[i]
   #   for key in y_maps:
   #     result1[offset+key, i] = img[int(h/2)+key, i]
   #     result1[offset-key, i] = img[int(h/2)-key, i]
+  offset=int(h_out/2)
   for k in range(c):
     for i in range (w):
       y_maps =  y_draft[i]
@@ -169,9 +143,6 @@ def curve_ext(input_img, ratio = 0.46):
         if result[2*offset - j,i,k] == 0:
           result[2*offset - j,i,k] = result[2*offset - j+1,i,k]
 
-    #print (table.map_point(i))
-
-  ##return the new image.
   return result
 
 def main():
