@@ -40,8 +40,6 @@ class egg_curve_mapping_table:
     self.correlations = oval_func(r, s, l)
     for i in range (self.r):
       i_s, i_l = self.correlations.get_x(i)
-      print(i_s)
-      print(i_l)
       self.full_table_s[i_s], self.full_table_l[i_l]= self._get_table(int(math.sqrt(self.r**2-i**2)),i_s,i_l)
 
   def _get_table(self, r, s, l):
@@ -86,20 +84,33 @@ class oval_func:
     self.short_curve_y={}
     self.long_curve_y={}
     self.s = s
-    temp={}
+    temp_table={}
+    last_y=0
+
     for i in range(s+1):
       temp = i-s
       self.short_curve_x[i] = int(r * math.sqrt(1-(s+l)**2 * temp**2/((l-s)*temp+2*s*l)**2))
-      temp[self.short_curve_x[i]]= s-i
-    for key in temp:
-      if
-    self.short_curve_y
+      temp_table[self.short_curve_x[i]]= s-i
+    for k in range(r+1):
+      if k in temp_table:
+        self.short_curve_y[k] = temp_table[k]
+        last_y = temp_table[k]
+      else:
+        self.short_curve_y[k] = last_y
+
+    temp_table={}
+    last_y=0
+
     for j in range(l+1):
       self.long_curve_x[j] = int(r * math.sqrt(1-(s+l)**2 * j**2/((l-s)*j+2*s*l)**2))
-      self.temp[self.long_curve_x[j]] = j
-    self.long_curve_y
-    print(self.short_curve_y)
-    print(self.long_curve_y)
+      temp_table[self.long_curve_x[j]] = j
+    for g in range(r+1):
+      if g in temp_table:
+        self.long_curve_y[g] = temp_table[g]
+        last_y = temp_table[g]
+      else:
+        self.long_curve_y[g] = last_y
+
   def get_y(self, x):
     if x < self.s:
       return self.short_curve_x[x]
@@ -110,7 +121,7 @@ class oval_func:
 
 def curve_ext(input_img):
   ##make new empty image.
-  pi=3.1415
+  pi=3.14159
   ratio = 0.46
   img=cv2.imread(input_img)
   h,w,c = img.shape
@@ -169,24 +180,24 @@ def main():
   #print(val)
   img_file = 'angle1.jpg'
   result1 = curve_ext(img_file)
-  cv2.imshow('result1', result1)
-  cv2.imwrite('result1.jpg', result1)
-  cv2.waitKey(0)
-  img_file = 'angle2.jpg'
-  result2 = curve_ext(img_file)
-  cv2.imshow('result2', result2)
-  cv2.imwrite('result2.jpg', result2)
-  cv2.waitKey(0)
-  img_file = 'angle3.jpg'
-  result3 = curve_ext(img_file)
-  cv2.imshow('result3', result3)
-  cv2.imwrite('result3.jpg', result3)
-  cv2.waitKey(0)
-  img_file = 'angle4.jpg'
-  result4 = curve_ext(img_file)
-  cv2.imshow('result4', result4)
-  cv2.imwrite('result4.jpg', result4)
-  cv2.waitKey(0)
+  # cv2.imshow('result1', result1)
+  # cv2.imwrite('result1.jpg', result1)
+  # cv2.waitKey(0)
+  # img_file = 'angle2.jpg'
+  # result2 = curve_ext(img_file)
+  # cv2.imshow('result2', result2)
+  # cv2.imwrite('result2.jpg', result2)
+  # cv2.waitKey(0)
+  # img_file = 'angle3.jpg'
+  # result3 = curve_ext(img_file)
+  # cv2.imshow('result3', result3)
+  # cv2.imwrite('result3.jpg', result3)
+  # cv2.waitKey(0)
+  # img_file = 'angle4.jpg'
+  # result4 = curve_ext(img_file)
+  # cv2.imshow('result4', result4)
+  # cv2.imwrite('result4.jpg', result4)
+  # cv2.waitKey(0)
 
 if __name__ == "__main__":
   main()
