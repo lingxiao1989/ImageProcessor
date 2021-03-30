@@ -178,20 +178,20 @@ def main():
   cv2.imshow('result1', result1)
   cv2.imwrite('result1.jpg', result1)
   # cv2.waitKey(0)
-  # img_file = 'angle2.jpg'
-  # result2 = curve_ext(img_file)
-  # cv2.imshow('result2', result2)
-  # cv2.imwrite('result2.jpg', result2)
+  img_file = 'angle2.jpg'
+  result2 = curve_ext(img_file, 0.48)
+  cv2.imshow('result2', result2)
+  cv2.imwrite('result2.jpg', result2)
   # cv2.waitKey(0)
-  # img_file = 'angle3.jpg'
-  # result3 = curve_ext(img_file)
-  # cv2.imshow('result3', result3)
-  # cv2.imwrite('result3.jpg', result3)
+  img_file = 'angle3.jpg'
+  result3 = curve_ext(img_file, 0.48)
+  cv2.imshow('result3', result3)
+  cv2.imwrite('result3.jpg', result3)
   # cv2.waitKey(0)
-  # img_file = 'angle4.jpg'
-  # result4 = curve_ext(img_file)
-  # cv2.imshow('result4', result4)
-  # cv2.imwrite('result4.jpg', result4)
+  img_file = 'angle4.jpg'
+  result4 = curve_ext(img_file, 0.48)
+  cv2.imshow('result4', result4)
+  cv2.imwrite('result4.jpg', result4)
   # cv2.waitKey(0)
 
 if __name__ == "__main__":

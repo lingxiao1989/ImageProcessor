@@ -1,11 +1,11 @@
-import cv2
+from cv2 import cv2 as cv2
 import numpy as np
 from matplotlib import pyplot as plt
 import time
 MIN = 10
 starttime=time.time()
-img1 = cv2.imread('1.jpg') #query
-img2 = cv2.imread('2.jpg') #train
+img1 = cv2.imread('img1.png') #query
+img2 = cv2.imread('img2.png') #train
 
 #img1gray=cv2.cvtColor(img1,cv2.COLOR_BGR2GRAY)
 #img2gray=cv2.cvtColor(img2,cv2.COLOR_BGR2GRAY)
