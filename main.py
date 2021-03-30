@@ -36,12 +36,13 @@ class egg_curve_mapping_table:
   def _get_table(self, r, s, l):
     current_table_r = {}
     current_table_l = {}
+    current_table_r[0]=0
     for i in range (s):
       val,err = integrate.quad(
         lambda x, r, s, l: math.sqrt(1 + (r * math.sqrt(1 - (s + l)**2 * x**2/(2*s*l + x*(l - s))**2 ) * (-0.5*(s + l)**2 * x**2 * (-2*l + 2*s)/(2*s*l + x*(l - s))**3 - (s + l)**2*x/(2*s*l + x*(l - s))**2))**2),
         i-s,0,
         args=(r, s, l,))
-      current_table_r[i] = int(val)
+      current_table_r[s-i] = int(val)
     for j in range (l+1):
       val,err = integrate.quad(
         lambda x, r, s, l: math.sqrt(1 + (r * math.sqrt(1 - (s + l)**2 * x**2/(2*s*l + x*(l - s))**2 ) * (-0.5*(s + l)**2 * x**2 * (-2*l + 2*s)/(2*s*l + x*(l - s))**3 - (s + l)**2*x/(2*s*l + x*(l - s))**2))**2),
@@ -130,30 +131,43 @@ def curve_ext(input_img, ratio = 0.46):
   # print("150long:",x_draft_s[150])
   # print("150short:",x_draft_s[150])
   ## generating the output image.
-  # for i in range (w):
-  #   y_maps =  y_draft[i]
-  #   for key in y_maps:
-  #     result1[offset+key, i] = img[int(h/2)+key, i]
-  #     result1[offset-key, i] = img[int(h/2)-key, i]
   offset_y=int(h_out/2)
   offset_x=int(w_out*ratio)  
   for k in range(c):
+    #stretch
     for i in range (w):
       for j in range(r):
-        x_maps_l = x_draft_l[j]
         x_maps_s = x_draft_s[j]
+        x_maps_l = x_draft_l[j]
         y_maps =  y_draft[i]
-        if j in y_maps and (s-i in x_maps_s or i-s in x_maps_l):
-          result[offset_y+y_maps[j], i, k] = img[int(h/2)+j, i, k]
-          result[offset_y-y_maps[j], i, k] = img[int(h/2)-j, i, k]
-
-    for i in range (w):
-      for j in range (2, offset):
+        if j in y_maps:
+          if i<s and s-i in x_maps_s:
+            result[offset_y+y_maps[j], offset_x-x_maps_s[s-i], k] = img[int(h/2)+j, i, k]
+            result[offset_y-y_maps[j], offset_x-x_maps_s[s-i], k] = img[int(h/2)-j, i, k]
+          elif i-s in x_maps_l:
+            result[offset_y+y_maps[j], offset_x+x_maps_l[i-s], k] = img[int(h/2)+j, i, k]
+            result[offset_y-y_maps[j], offset_x+x_maps_l[i-s], k] = img[int(h/2)-j, i, k]
+    #fill in
+    for i in range (w_out):
+      for j in range (2, offset_y):
         if result[j,i,k] == 0:
           result[j,i,k] = result[j-1,i,k]
-        if result[2*offset - j,i,k] == 0:
-          result[2*offset - j,i,k] = result[2*offset - j+1,i,k]
+        if result[2*offset_y - j,i,k] == 0:
+          result[2*offset_y - j,i,k] = result[2*offset_y - j+1,i,k]
 
+    for i in range (offset_x):
+      for j in range (2, offset_y):
+        if result[j,i,k] == 0:
+          result[j,i,k] = result[j,i+1,k]
+        if result[2*offset_y - j,i,k] == 0:
+          result[2*offset_y - j,i,k] = result[2*offset_y - j,i+1,k]
+
+    for i in range (w_out, offset_x):
+      for j in range (2, offset_y):
+        if result[j,i,k] == 0:
+          result[j,i,k] = result[j,i-1,k]
+        if result[2*offset_y - j,i,k] == 0:
+          result[2*offset_y - j,i,k] = result[2*offset_y - j,i-1,k]
   return result
 
 def main():
