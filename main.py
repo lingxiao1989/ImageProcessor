@@ -34,22 +34,39 @@ class egg_curve_mapping_table:
       self.full_table_s[i_s], self.full_table_l[i_l]= self._get_table(int(math.sqrt(self.r**2-i**2)),i_s,i_l)
 
   def _get_table(self, r, s, l):
-    current_table_r = {}
+    current_table_s = {}
     current_table_l = {}
-    current_table_r[0]=0
-    for i in range (s):
-      val,err = integrate.quad(
-        lambda x, r, s, l: math.sqrt(1 + (r * math.sqrt(1 - (s + l)**2 * x**2/(2*s*l + x*(l - s))**2 ) * (-0.5*(s + l)**2 * x**2 * (-2*l + 2*s)/(2*s*l + x*(l - s))**3 - (s + l)**2*x/(2*s*l + x*(l - s))**2))**2),
-        i-s,0,
-        args=(r, s, l,))
-      current_table_r[s-i] = int(val)
-    for j in range (l+1):
-      val,err = integrate.quad(
-        lambda x, r, s, l: math.sqrt(1 + (r * math.sqrt(1 - (s + l)**2 * x**2/(2*s*l + x*(l - s))**2 ) * (-0.5*(s + l)**2 * x**2 * (-2*l + 2*s)/(2*s*l + x*(l - s))**3 - (s + l)**2*x/(2*s*l + x*(l - s))**2))**2),
-        0,j,
-        args=(r, s, l,))
-      current_table_l[j] = int(val)
-    return current_table_r, current_table_l
+    current_table_s[0]=0
+    for k in range (s):
+      t = numpy.arange(0, k, 0.1)
+      x = t-s
+      y = r * numpy.sqrt(1-(s+l)**2 * x**2/((l-s)*x+2*s*l)**2)
+      area_list = []
+      area_list = [numpy.sqrt( (x[i]-x[i-1])**2 + (y[i]-y[i-1])**2 ) for i in range(1,len(t))]
+      area = sum(area_list)
+      current_table_s[s-k] = int(area)
+    for m in range (l+1):
+      t = numpy.arange(0, m, 0.1)
+      x = t
+      y = r * numpy.sqrt(1-(s+l)**2 * x**2/((l-s)*x+2*s*l)**2)
+      area_list = []
+      area_list = [numpy.sqrt( (x[i]-x[i-1])**2 + (y[i]-y[i-1])**2 ) for i in range(1,len(t))]
+      area = sum(area_list)
+      current_table_l[m] = int(area)
+
+    # for i in range (s):
+    #   val,err = integrate.quad(
+    #     lambda x, r, s, l: math.sqrt(1 + (r * math.sqrt(1 - (s + l)**2 * x**2/(2*s*l + x*(l - s))**2 ) * (-0.5*(s + l)**2 * x**2 * (-2*l + 2*s)/(2*s*l + x*(l - s))**3 - (s + l)**2*x/(2*s*l + x*(l - s))**2))**2),
+    #     i-s,0,
+    #     args=(r, s, l,))
+    #   current_table_s[s-i] = int(val)
+    # for j in range (l+1):
+    #   val,err = integrate.quad(
+    #     lambda x, r, s, l: math.sqrt(1 + (r * math.sqrt(1 - (s + l)**2 * x**2/(2*s*l + x*(l - s))**2 ) * (-0.5*(s + l)**2 * x**2 * (-2*l + 2*s)/(2*s*l + x*(l - s))**3 - (s + l)**2*x/(2*s*l + x*(l - s))**2))**2),
+    #     0,j,
+    #     args=(r, s, l,))
+    #   current_table_l[j] = int(val)
+    return current_table_s, current_table_l
 
   def check_table(self, r):
     s, l = self.correlations.get_x(r)
@@ -177,21 +194,25 @@ def main():
   result1 = curve_ext(img_file, 0.48)
   cv2.imshow('result1', result1)
   cv2.imwrite('result1.jpg', result1)
+  #cv2.imwrite('resultseg1.jpg', result1[150:350,])
   # cv2.waitKey(0)
   img_file = 'angle2.jpg'
   result2 = curve_ext(img_file, 0.48)
   cv2.imshow('result2', result2)
   cv2.imwrite('result2.jpg', result2)
+  #cv2.imwrite('resultseg2.jpg', result2[150:350,])
   # cv2.waitKey(0)
   img_file = 'angle3.jpg'
   result3 = curve_ext(img_file, 0.48)
   cv2.imshow('result3', result3)
   cv2.imwrite('result3.jpg', result3)
+  #cv2.imwrite('resultseg3.jpg', result3[150:350,])
   # cv2.waitKey(0)
   img_file = 'angle4.jpg'
   result4 = curve_ext(img_file, 0.48)
   cv2.imshow('result4', result4)
   cv2.imwrite('result4.jpg', result4)
+  #cv2.imwrite('resultseg4.jpg', result4[150:350,])
   # cv2.waitKey(0)
 
 if __name__ == "__main__":
