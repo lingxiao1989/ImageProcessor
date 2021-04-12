@@ -4,75 +4,6 @@ from cv2 import cv2 as cv2
 import numpy
 import mmcv
 
-class circle_mapping_table:
-  def __init__(self,r):
-    self.full_table = {}
-    self.r = r
-    for i in range(self.r+1):
-      self.full_table[i]=self._get_table(i)
-
-  def _get_table(self, r):
-    current_table={}
-    current_table[0]=0
-    for i in range (r):
-      val,err = integrate.quad(lambda x,r:r * math.sqrt(1/(r**2-x**2)),0,i,args=(r,))
-      current_table[i] = int(val)
-    return current_table
-
-  def check_table(self, r):
-    return self.full_table[r]
-
-class egg_curve_mapping_table:
-  def __init__(self,r,s,l):
-    self.full_table_s = {}
-    self.full_table_l = {}
-    self.r = r
-    self.s = s
-    self.l = l
-    self.correlations = oval_func(r, s, l)
-    for i in range (self.r):
-      i_s, i_l = self.correlations.get_x(i)
-      self.full_table_s[i_s], self.full_table_l[i_l]= self._get_table(int(math.sqrt(self.r**2-i**2)),i_s,i_l)
-
-  def _get_table(self, r, s, l):
-    current_table_s = {}
-    current_table_l = {}
-    current_table_s[0]=0
-    for k in range (s):
-      t = numpy.arange(0, k, 0.1)
-      x = t-s
-      y = r * numpy.sqrt(1-(s+l)**2 * x**2/((l-s)*x+2*s*l)**2)
-      area_list = []
-      area_list = [numpy.sqrt( (x[i]-x[i-1])**2 + (y[i]-y[i-1])**2 ) for i in range(1,len(t))]
-      area = sum(area_list)
-      current_table_s[s-k] = int(area)
-    for m in range (l+1):
-      t = numpy.arange(0, m, 0.1)
-      x = t
-      y = r * numpy.sqrt(1-(s+l)**2 * x**2/((l-s)*x+2*s*l)**2)
-      area_list = []
-      area_list = [numpy.sqrt( (x[i]-x[i-1])**2 + (y[i]-y[i-1])**2 ) for i in range(1,len(t))]
-      area = sum(area_list)
-      current_table_l[m] = int(area)
-
-    # for i in range (s):
-    #   val,err = integrate.quad(
-    #     lambda x, r, s, l: math.sqrt(1 + (r * math.sqrt(1 - (s + l)**2 * x**2/(2*s*l + x*(l - s))**2 ) * (-0.5*(s + l)**2 * x**2 * (-2*l + 2*s)/(2*s*l + x*(l - s))**3 - (s + l)**2*x/(2*s*l + x*(l - s))**2))**2),
-    #     i-s,0,
-    #     args=(r, s, l,))
-    #   current_table_s[s-i] = int(val)
-    # for j in range (l+1):
-    #   val,err = integrate.quad(
-    #     lambda x, r, s, l: math.sqrt(1 + (r * math.sqrt(1 - (s + l)**2 * x**2/(2*s*l + x*(l - s))**2 ) * (-0.5*(s + l)**2 * x**2 * (-2*l + 2*s)/(2*s*l + x*(l - s))**3 - (s + l)**2*x/(2*s*l + x*(l - s))**2))**2),
-    #     0,j,
-    #     args=(r, s, l,))
-    #   current_table_l[j] = int(val)
-    return current_table_s, current_table_l
-
-  def check_table(self, r):
-    s, l = self.correlations.get_x(r)
-    return self.full_table_s[s], self.full_table_l[l]
-
 class oval_func:
   def __init__(self,r,s,l):
     self.short_curve_x={}
@@ -188,21 +119,55 @@ def curve_ext(input_img, ratio = 0.46):
           result[2*offset_y - j,i,k] = result[2*offset_y - j,i-1,k]
   return result
 
-def curve_ext(r,s,l):
-  correlations = oval_func(r, s, l)
-  lengths={}
-  max_length = 0
-  for i in range h:
-    length = 2*3.1415*correlations.get_y(x)
-    lengths[i] = length
-    if length > max_length:
-      max_length = length
+# def curve_ext(r,s,l):
+#   correlations = oval_func(r, s, l)
+#   lengths={}
+#   max_length = 0
+#   for i in range h:
+#     length = 2*3.1415*correlations.get_y(x)
+#     lengths[i] = length
+#     if length > max_length:
+#       max_length = length
   
 def main():
-  video = mmcv.VideoReader('test.mp4')
+  #setup input
+  video = mmcv.VideoReader('eggroll_wb.mp4')
   print(len(video))
-  for frame in video:
-    frame 
+  print(video[0].shape)
+  cv2.imwrite('video_result.jpg', video[0])
+  #init
+  pi=3.1415
+  left=128
+  right=548
+  l=360-128
+  s=548-360
+  r=(368-30)/2
+  correlations = oval_func(r, s, l)
+  h_out = int(420*pi/2)
+  w_out = int(338*pi/2)
+  #get egg shape
+  lengths={}
+  values={}
+  max_length = 0
+  for i in range (h):
+      length = 2*3.1415*correlations.get_y(i)
+      lengths[i] = length
+      values[i] = {}
+      if length > max_length:
+          max_length = length
+
+  result = numpy.zeros((h_out,w_out,3),numpy.uint8)
+  value={}
+  for j in len(frames):
+      for i in range(h):
+          if i%max_length/lengths[i] is 0:
+              img=frames[j]
+              values[i].append(img[h,w/2,c])
+
+  for i in range(h):
+    result[h,w,c] = values[i]            
+  #for frame in video:
+    #frame 
 
 if __name__ == "__main__":
   main()
