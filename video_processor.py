@@ -201,7 +201,8 @@ def curve_ext(r,s,l):
 def main():
   video = mmcv.VideoReader('test.mp4')
   print(len(video))
-  for 
+  for frame in video:
+    frame 
 
 if __name__ == "__main__":
   main()
