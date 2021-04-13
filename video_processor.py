@@ -3,6 +3,7 @@ import math
 from cv2 import cv2 as cv2
 import numpy
 import mmcv
+from PIL import Image
 
 class oval_func:
   def __init__(self,r,s,l):
@@ -131,43 +132,63 @@ def curve_ext(input_img, ratio = 0.46):
   
 def main():
   #setup input
-  video = mmcv.VideoReader('eggroll_wb.mp4')
-  print(len(video))
-  print(video[0].shape)
-  cv2.imwrite('video_result.jpg', video[0])
+  video = mmcv.VideoReader('eggroll_color.mp4')
+  frame_size=len(video)
+  #frame=video[0]
+  print(frame_size)
+  #cv2.imwrite('video_result.jpg', frame[30:368,128:548,])
   #init
   pi=3.1415
   left=128
   right=548
   l=360-128
   s=548-360
-  r=(368-30)/2
+  r=int((368-30)/2)
   correlations = oval_func(r, s, l)
-  h_out = int(420*pi/2)
-  w_out = int(338*pi/2)
+  h_out = int(338*pi)
+  w_out = int(420*pi)
   #get egg shape
   lengths={}
-  values={}
+  values_r={}
+  values_g={}
+  values_b={}
   max_length = 0
-  for i in range (h):
-      length = 2*3.1415*correlations.get_y(i)
-      lengths[i] = length
-      values[i] = {}
-      if length > max_length:
-          max_length = length
-
+  for i in range (s+l+1):
+    length = int(2*3.1415*correlations.get_y(i))
+    lengths[i] = length
+    values_r[i] = []
+    values_g[i] = []
+    values_b[i] = []
+    if length > max_length:
+      max_length = length
+  print(lengths)
+  #get value from frames
   result = numpy.zeros((h_out,w_out,3),numpy.uint8)
   value={}
-  for j in len(frames):
-      for i in range(h):
-          if i%max_length/lengths[i] is 0:
-              img=frames[j]
-              values[i].append(img[h,w/2,c])
+  for j in range(frame_size):
+    frame=video[j]
+    target=frame[30:368,128:548,]
+    for i in range (s+l):
+      temp=s+l-i
+      if j%(max_length/(lengths[temp]+1)) < 1:
+        values_r[i].append(target[r,i,0])
+        values_g[i].append(target[r,i,1])
+        values_b[i].append(target[r,i,2]) 
+  print(values_r)
+  #generate output
+  # print(h_out)
+  # print(w_out)  
+  for i in range(1,s+l):
+    line_r=values_r[i]
+    line_g=values_g[i]
+    line_b=values_b[i]
+    offset = int((max_length-lengths[s+l-i])/4)
+    for j in range(len(line_r)):
+      result[j+offset,i,0] = line_r[j]
+      result[j+offset,i,1] = line_g[j]
+      result[j+offset,i,2] = line_b[j]
 
-  for i in range(h):
-    result[h,w,c] = values[i]            
-  #for frame in video:
-    #frame 
+  cv2.imwrite('video_result.jpg', result)
 
 if __name__ == "__main__":
   main()
